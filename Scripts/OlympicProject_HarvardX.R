@@ -1,3 +1,5 @@
+#Install Packages and Load Data====
+
 #Install required packages
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 if(!require(caret)) install.packages("caret", repos = "http://cran.us.r-project.org")
@@ -253,29 +255,18 @@ str(OlympicSummer)
 #Explore Data====
 OlympicSummer %>%
   filter(Sport=="Swimming", Sex=="M") %>%
-  ggplot(aes(Height,Medal_Won)) +
-  geom_point() +
-  geom_smooth()
+  ggplot(aes(Medal_Won,Height)) +
+  geom_boxplot()
 
 OlympicSummer %>%
   filter(Sport=="Swimming", Sex=="M") %>%
-  ggplot(aes(Weight,Medal_Won)) +
-  geom_point() +
-  geom_smooth()
+  ggplot(aes(Medal_Won,Weight)) +
+  geom_boxplot()
 
 OlympicSummer %>%
   filter(Sport=="Swimming", Sex=="M") %>%
-  ggplot(aes(Age,Medal_Won)) +
-  geom_point() +
-  geom_smooth()
-
-
-cor(OlympicSummer$Medal_Won,OlympicSummer$Weight,use="complete.obs")
-cor(OlympicSummer$Medal_Won,OlympicSummer$Height,use="complete.obs")
-cor(OlympicSummer$Medal_Won,OlympicSummer$Age,use="complete.obs")
-cor(OlympicSummer$Medal_Won,OlympicSummer$prior_medals,use="complete.obs")
-cor(OlympicSummer$Medal_Won,OlympicSummer$events,use="complete.obs")
-cor(OlympicSummer$Medal_Won,OlympicSummer$olympic_rep,use="complete.obs")
+  ggplot(aes(Medal_Won,Age)) +
+  geom_boxplot()
 
 
 #Split Data into Test and Train====
