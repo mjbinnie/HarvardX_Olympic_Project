@@ -12,7 +12,8 @@ if(!require(janitor)) install.packages("janitor", repos = "http://cran.us.r-proj
 if(!require(e1071)) install.packages("e1071", repos = "http://cran.us.r-project.org")
 if(!require(lme4)) install.packages("lme4", repos = "http://cran.us.r-project.org")
 
-library(tidyverse)
+#library(tidyverse)
+library(dplyr)
 library(caret)
 library(data.table)
 library(lubridate)
@@ -238,6 +239,7 @@ OlympicSummer <-
 
 #transform into functional classes, numeric and factor (5 levels for region)
 sapply(OlympicSummer,class)
+glimpse(OlympicSummer)
 
 table(OlympicSummer$Medal_Won)
 
@@ -246,8 +248,10 @@ table(OlympicSummer$Medal_Won)/nrow(OlympicSummer)
 OlympicSummer$Sex <- as.factor(OlympicSummer$Sex)
 OlympicSummer$Region <- as.factor(OlympicSummer$Region)
 OlympicSummer$Medal_Won <- as.factor(OlympicSummer$Medal_Won)
+OlympicSummer$ID <- as.character(OlympicSummer$ID)
 OlympicSummer$medal_count <- as.integer(OlympicSummer$medal_count)
 OlympicSummer$prior_medals <- as.integer(OlympicSummer$prior_medals)
+glimpse(OlympicSummer)
 
 sapply(OlympicSummer,class)
 str(OlympicSummer)
@@ -273,13 +277,31 @@ OlympicSummer %>%
 #Reserve 2016 Olympics for Final Hold out Test
 Validation_2016 <- 
   OlympicSummer %>%
+  filter(Sport == "Swimming") %>%
   filter(Year=="2016")
+
+Training_Data <- 
+  OlympicSummer %>% 
+  filter(Sport == "Swimming") %>%
+  filter(Year != 2016)
+
+Training_Data %>% tabyl(Medal_Won)
+  
 
 #Randomly divide remaining data set (1896-2012) into 20% test and 80% train data set
 set.seed(1, sample.kind="Rounding")
-test_index <- createDataPartition(y = OlympicSummer$Medal_Won, times = 1, p = 0.2, list = FALSE)
-Olympic_Train <- OlympicSummer[-test_index,]
-Olympic_Test <-OlympicSummer[test_index,]
+test_index <- 
+  createDataPartition(y = Training_Data$Medal_Won,
+                      times = 1,
+                      p = 0.2,
+                      list = FALSE)
+?createDataPartition
+
+Olympic_Train <- Training_Data[-test_index,]
+Olympic_Validation <-Training_Data[test_index,]
+
+Olympic_Train %>% tabyl(Medal_Won)
+Olympic_Validation %>% tabyl(Medal_Won)
 
 #remove transition data frame
 rm(test_index)
@@ -293,31 +315,43 @@ rm(test_index)
 #Train Models====
 #Logistic Regression====
 
-train_1 <- 
+train_swimming <- 
   Olympic_Train %>%
-  filter(!is.na(Weight),!is.na(Height))
+  na.omit()
+  #filter(!is.na(Weight),!is.na(Height))
 
-test_1 <- 
-  Olympic_Test %>%
-  filter(!is.na(Weight),!is.na(Height))
+validation_swimming <- 
+  Olympic_Validation %>%
+  na.omit()
+  # filter(!is.na(Weight),!is.na(Height))
 
-glm <- 
-  train_1 %>%
-  filter(Sport=="Swimming") %>%
-  glm(Medal_Won ~ Weight + Height, data=., family = "binomial")
+Olympic_Validation %>% na.omit()
 
-glm_predict <- 
-  predict(glm, newdata =  test_1, type="response")  
+glm_model_swimming <- 
+  glm(Medal_Won ~ Weight + Height + Sex,
+      data= train_swimming ,
+      family = "binomial")
 
-glm_outcome <- factor(if_else(glm_predict >0.5,1,0))
+validation_swimming
 
-confusionMatrix(glm_outcome, test_1$Medal_Won)$overall["Accuracy"]
+predict(glm_model_swimming, type = "response")
+
+?predict.glm
+
+train_swimming$pred_medal_win_prob <- 
+  predict(glm_model_swimming, newdata =  train_swimming, type="response")  
+
+train_swimming$pred_medal_win_outcome <- factor(if_else(train_swimming$pred_medal_win_prob >0.5,1,0))
+# install.packages("e1071")
+library(e1071)
+confusionMatrix(train_swimming$pred_medal_win_outcome, train_swimming$Medal_Won)$overall["Accuracy"]
 
 
 #Mixed Effect Logistic Regression====
+formula <- 
 glmer()
 
-#Classification (Decision) Tree====
+# Classification (Decision) Tree ====
+# use the caret package, and you can specify pretty much everything from above
 
-
-#Random Forest====
+# Random Forest ====
