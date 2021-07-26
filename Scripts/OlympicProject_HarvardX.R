@@ -258,19 +258,35 @@ str(OlympicSummer)
 
 #Explore Data====
 OlympicSummer %>%
-  filter(Sport=="Swimming", Sex=="M") %>%
+  filter(Sport=="Swimming") %>%
   ggplot(aes(Medal_Won,Height)) +
   geom_boxplot()
 
 OlympicSummer %>%
-  filter(Sport=="Swimming", Sex=="M") %>%
+  filter(Sport=="Swimming") %>%
   ggplot(aes(Medal_Won,Weight)) +
   geom_boxplot()
 
 OlympicSummer %>%
-  filter(Sport=="Swimming", Sex=="M") %>%
+  filter(Sport=="Swimming") %>%
   ggplot(aes(Medal_Won,Age)) +
   geom_boxplot()
+
+OlympicSummer %>%
+  filter(Sport=="Swimming") %>%
+  ggplot(aes(Medal_Won,events)) +
+  geom_boxplot()
+
+OlympicSummer %>%
+  filter(Sport=="Swimming") %>%
+  ggplot(aes(Medal_Won,prior_medals)) +
+  geom_boxplot()
+
+OlympicSummer %>%
+  filter(Sport=="Swimming") %>%
+  ggplot(aes(Medal_Won,olympic_rep)) +
+  geom_boxplot()
+
 
 
 #Split Data into Test and Train====
@@ -353,5 +369,7 @@ glmer()
 
 # Classification (Decision) Tree ====
 # use the caret package, and you can specify pretty much everything from above
+rpart()
 
 # Random Forest ====
+rf()
